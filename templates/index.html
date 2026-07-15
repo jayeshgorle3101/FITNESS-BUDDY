@@ -1,1 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Fitness Buddy – Powered by IBM Granite</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Custom Styles -->
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
+</head>
+<body>
 
+<!-- ═══════════════════ NAVIGATION ═══════════════════ -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+  <div class="container-fluid px-3 px-lg-4">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+      <div class="brand-icon"><i class="bi bi-activity"></i></div>
+      <span class="brand-text">FitBuddy <span class="badge-ai">AI</span></span>
+    </a>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+      <button class="btn btn-theme-toggle" id="themeToggle" title="Toggle dark mode">
+        <i class="bi bi-moon-fill" id="themeIcon"></i>
+      </button>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <i class="bi bi-list fs-4"></i>
+      </button>
+    </div>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-lg-3 gap-1">
+        <li class="nav-item"><a class="nav-link nav-tab active" href="#" data-tab="dashboard"><i class="bi bi-grid-1x2"></i> Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link nav-tab" href="#" data-tab="chat"><i class="bi bi-chat-dots"></i> AI Chat</a></li>
+        <li class="nav-item"><a class="nav-link nav-tab" href="#" data-tab="workout"><i class="bi bi-lightning-charge"></i> Workouts</a></li>
+        <li class="nav-item"><a class="nav-link nav-tab" href="#" data-tab="nutrition"><i class="bi bi-egg-fried"></i> Nutrition</a></li>
+        <li class="nav-item"><a class="nav-link nav-tab" href="#" data-tab="bmi"><i class="bi bi-graph-up"></i> BMI</a></li>
+        <li class="nav-item"><a class="nav-link nav-tab" href="#" data-tab="progress"><i class="bi bi-bar-chart-line"></i> Progress</a></li>
+        <li class="nav-item"><a class="nav-link nav-tab" href="#" data-tab="profile"><i class="bi bi-person-circle"></i> Profile</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
+<main class="main-content">
+
+  <!-- ── DASHBOARD TAB ── -->
+  <section id="tab-dashboard" class="tab-section active">
+    <div class="container-fluid px-3 px-lg-4">
+
+      <!-- Hero Banner -->
+      <div class="hero-banner mb-4">
+        <div class="hero-text">
+          <h1 class="hero-title">Good <span id="greetingTime">Morning</span>, <span id="heroName">Champion</span>! 👋</h1>
+          <p class="hero-sub">Your AI-powered fitness journey starts here. Let's crush today's goals!</p>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-hero" onclick="switchTab('chat')"><i class="bi bi-chat-dots-fill me-2"></i>Ask FitBuddy AI</button>
+            <button class="btn btn-hero-outline" onclick="switchTab('workout')"><i class="bi bi-play-circle me-2"></i>Start Workout</button>
+          </div>
+        </div>
+        <div class="hero-image d-none d-md-flex">
+          <div class="hero-svg-wrap">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="hero-svg">
+              <circle cx="100" cy="60" r="35" fill="var(--accent)" opacity="0.15"/>
+              <circle cx="100" cy="60" r="25" fill="var(--accent)" opacity="0.3"/>
+              <line x1="100" y1="95" x2="100" y2="155" stroke="var(--accent)" stroke-width="8" stroke-linecap="round"/>
+              <line x1="60" y1="115" x2="140" y2="115" stroke="var(--accent)" stroke-width="7" stroke-linecap="round"/>
+              <line x1="100" y1="155" x2="75" y2="185" stroke="var(--accent)" stroke-width="7" stroke-linecap="round"/>
+              <line x1="100" y1="155" x2="125" y2="185" stroke="var(--accent)" stroke-width="7" stroke-linecap="round"/>
+              <circle cx="35" cy="110" r="12" fill="var(--accent2)" opacity="0.5"/>
+              <circle cx="165" cy="110" r="12" fill="var(--accent2)" opacity="0.5"/>
+              <text x="100" y="62" text-anchor="middle" font-size="20" fill="var(--accent)">🏋️</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Motivation Card -->
+      <div class="motivation-card mb-4" id="motivationCard">
+        <div class="d-flex align-items-start gap-3">
+          <div class="moti-icon"><i class="bi bi-stars"></i></div>
+          <div>
+            <div class="moti-label">Daily Motivation</div>
+            <p class="moti-quote mb-0" id="dailyQuote">Loading your daily motivation...</p>
+            <small class="text-muted" id="quoteDate"></small>
+          </div>
+          <button class="btn btn-sm btn-refresh ms-auto" onclick="loadMotivation()" title="New quote">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-fire"></i></div>
+            <div class="stat-value" id="statsCalories">0</div>
+            <div class="stat-label">Cal Burned Today</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-list-check"></i></div>
+            <div class="stat-value" id="statsWorkouts">0</div>
+            <div class="stat-label">Workouts Done</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon orange"><i class="bi bi-droplet-fill"></i></div>
+            <div class="stat-value" id="statsWater">0</div>
+            <div class="stat-label">Glasses of Water</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-icon purple"><i class="bi bi-trophy-fill"></i></div>
+            <div class="stat-value" id="statsStreak">0</div>
+            <div class="stat-label">Day Streak 🔥</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions + Water Tracker -->
+      <div class="row g-3">
+        <div class="col-lg-7">
+          <div class="card-panel">
+            <h6 class="panel-title"><i class="bi bi-grid me-2"></i>Quick Actions</h6>
+            <div class="quick-actions">
+              <button class="qa-btn" onclick="switchTab('chat');setTimeout(()=>sendQuickPrompt('Give me a quick 20-minute home workout for today!'),300)">
+                <i class="bi bi-lightning-charge-fill"></i><span>Quick Workout</span>
+              </button>
+              <button class="qa-btn" onclick="switchTab('nutrition')">
+                <i class="bi bi-egg-fried"></i><span>Meal Plan</span>
+              </button>
+              <button class="qa-btn" onclick="switchTab('bmi')">
+                <i class="bi bi-graph-up-arrow"></i><span>Check BMI</span>
+              </button>
+              <button class="qa-btn" onclick="switchTab('chat');setTimeout(()=>sendQuickPrompt('Give me some healthy Indian breakfast ideas for weight loss.'),300)">
+                <i class="bi bi-sun"></i><span>Breakfast Ideas</span>
+              </button>
+              <button class="qa-btn" onclick="switchTab('chat');setTimeout(()=>sendQuickPrompt('Motivate me to stay consistent with my fitness goals!'),300)">
+                <i class="bi bi-stars"></i><span>Get Motivated</span>
+              </button>
+              <button class="qa-btn" onclick="switchTab('progress')">
+                <i class="bi bi-bar-chart-line-fill"></i><span>My Progress</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card-panel h-100">
+            <h6 class="panel-title"><i class="bi bi-droplet me-2"></i>Water Intake Tracker</h6>
+            <div class="water-tracker">
+              <div class="water-visual">
+                <div class="water-bottle">
+                  <div class="water-fill" id="waterFill"></div>
+                  <div class="water-label" id="waterLabel">0 / 8</div>
+                </div>
+              </div>
+              <div class="water-controls">
+                <p class="small text-muted mb-2">Daily goal: 8 glasses</p>
+                <button class="btn btn-water" onclick="addWater()"><i class="bi bi-plus-circle me-1"></i>Add Glass</button>
+                <button class="btn btn-water-reset ms-2" onclick="resetWater()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── AI CHAT TAB ── -->
+  <section id="tab-chat" class="tab-section">
+    <div class="container-fluid px-3 px-lg-4 h-100 d-flex flex-column">
+      <div class="chat-header mb-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="ai-avatar"><i class="bi bi-robot"></i></div>
+          <div>
+            <h5 class="mb-0">FitBuddy AI</h5>
+            <small class="text-success"><i class="bi bi-circle-fill me-1" style="font-size:8px"></i>Powered by IBM Granite</small>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="clearChat()"><i class="bi bi-trash me-1"></i>Clear</button>
+      </div>
+      <div class="chat-window" id="chatWindow">
+        <div class="chat-bubble bot">
+          <div class="bubble-content">
+            <p class="mb-1">👋 <strong>Hi! I'm FitBuddy</strong>, your AI fitness assistant powered by IBM Granite!</p>
+            <p class="mb-2">I can help you with:</p>
+            <ul class="mb-1">
+              <li>💪 Personalised home workout plans</li>
+              <li>🥗 Healthy Indian meal suggestions</li>
+              <li>📊 BMI calculation & advice</li>
+              <li>🌟 Daily motivation & habit building</li>
+              <li>🗓️ Custom fitness schedules</li>
+            </ul>
+            <p class="mb-0">What would you like to work on today?</p>
+          </div>
+          <div class="bubble-time">Just now · IBM Granite</div>
+        </div>
+      </div>
+      <!-- Quick Prompt Chips -->
+      <div class="quick-chips" id="quickChips">
+        <button class="chip" onclick="sendQuickPrompt('Give me a beginner home workout plan')">🏋️ Beginner Workout</button>
+        <button class="chip" onclick="sendQuickPrompt('Suggest a healthy Indian meal plan for weight loss')">🥗 Meal Plan</button>
+        <button class="chip" onclick="sendQuickPrompt('How to build a morning fitness habit?')">🌅 Morning Habit</button>
+        <button class="chip" onclick="sendQuickPrompt('Give me motivation to stay consistent')">⚡ Motivate Me</button>
+        <button class="chip" onclick="sendQuickPrompt('What are the best exercises for belly fat?')">🎯 Belly Fat</button>
+        <button class="chip" onclick="sendQuickPrompt('Suggest high-protein Indian vegetarian foods')">🌱 Protein Foods</button>
+      </div>
+      <!-- Input -->
+      <div class="chat-input-area">
+        <div class="chat-input-wrap">
+          <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask FitBuddy anything about fitness, diet, workouts..." maxlength="500"></textarea>
+          <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()">
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </div>
+        <div class="d-flex justify-content-between mt-1">
+          <small class="text-muted">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</small>
+          <small class="text-muted" id="charCount">0/500</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── WORKOUT PLANNER TAB ── -->
+  <section id="tab-workout" class="tab-section">
+    <div class="container-fluid px-3 px-lg-4">
+      <h4 class="section-title"><i class="bi bi-lightning-charge me-2"></i>Workout Planner</h4>
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="form-label fw-500">Fitness Level</label>
+          <select class="form-select modern-select" id="workoutLevel">
+            <option value="beginner">🌱 Beginner</option>
+            <option value="intermediate">🔥 Intermediate</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-500">Primary Goal</label>
+          <select class="form-select modern-select" id="workoutGoal">
+            <option value="weight loss">⚖️ Weight Loss</option>
+            <option value="muscle gain">💪 Muscle Gain</option>
+            <option value="flexibility">🧘 Flexibility</option>
+            <option value="cardio">❤️ Cardio Health</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-500">Days per Week</label>
+          <select class="form-select modern-select" id="workoutDays">
+            <option value="3">3 days</option>
+            <option value="4">4 days</option>
+            <option value="5" selected>5 days</option>
+            <option value="6">6 days</option>
+          </select>
+        </div>
+      </div>
+      <div class="d-flex gap-2 mb-4">
+        <button class="btn btn-primary-custom px-4" onclick="generateWorkoutPlan()">
+          <i class="bi bi-calendar3 me-2"></i>Generate Weekly Plan
+        </button>
+        <button class="btn btn-outline-custom" onclick="switchTab('chat');setTimeout(()=>sendQuickPrompt('Create a custom workout plan for me based on my profile'),300)">
+          <i class="bi bi-robot me-2"></i>Ask AI for Custom Plan
+        </button>
+      </div>
+      <div id="workoutPlanResult"></div>
+    </div>
+  </section>
+
+  <!-- ── NUTRITION TAB ── -->
+  <section id="tab-nutrition" class="tab-section">
+    <div class="container-fluid px-3 px-lg-4">
+      <h4 class="section-title"><i class="bi bi-egg-fried me-2"></i>Nutrition & Meal Planner</h4>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label fw-500">Your Goal</label>
+          <select class="form-select modern-select" id="nutritionGoal">
+            <option value="balanced">⚖️ Balanced Diet</option>
+            <option value="weight_loss">🔥 Weight Loss</option>
+            <option value="muscle_gain">💪 Muscle Gain</option>
+          </select>
+        </div>
+        <div class="col-md-6 d-flex align-items-end">
+          <button class="btn btn-primary-custom w-100" onclick="generateMealPlan()">
+            <i class="bi bi-journal-check me-2"></i>Generate Meal Plan
+          </button>
+        </div>
+      </div>
+      <div id="mealPlanResult"></div>
+      <!-- Indian Food Highlights -->
+      <div class="row g-3 mt-2">
+        <div class="col-12"><h6 class="panel-title"><i class="bi bi-flag me-2"></i>🇮🇳 Healthy Indian Foods Spotlight</h6></div>
+        <div class="col-6 col-md-3"><div class="food-card"><div class="food-icon">🫘</div><div class="food-name">Dal (Lentils)</div><div class="food-macro">Protein: 9g/100g</div></div></div>
+        <div class="col-6 col-md-3"><div class="food-card"><div class="food-icon">🧀</div><div class="food-name">Paneer</div><div class="food-macro">Protein: 18g/100g</div></div></div>
+        <div class="col-6 col-md-3"><div class="food-card"><div class="food-icon">🌾</div><div class="food-name">Whole Wheat Roti</div><div class="food-macro">Fibre: 2.7g each</div></div></div>
+        <div class="col-6 col-md-3"><div class="food-card"><div class="food-icon">🥜</div><div class="food-name">Sprouts</div><div class="food-macro">Protein: 4g/100g</div></div></div>
+        <div class="col-6 col-md-3"><div class="food-card"><div class="food-icon">🥛</div><div class="food-name">Curd / Yogurt</div><div class="food-macro">Probiotic + Protein</div></div></div>
+        <div class="col-6 col-md-3"><div class="food-card"><div class="food-icon">🍌</div><div class="food-name">Banana</div><div class="food-macro">Energy: 89 kcal</div></div></div>
+        <div class="col-6 col-md-3"><div class="food-card"><div class="food-icon">🌰</div><div class="food-name">Mixed Nuts</div><div class="food-macro">Healthy Fats + Protein</div></div></div>
+        <div class="col-6 col-md-3"><div class="food-card"><div class="food-icon">🫐</div><div class="food-name">Sattu</div><div class="food-macro">Protein: 22g/100g</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BMI TAB ── -->
+  <section id="tab-bmi" class="tab-section">
+    <div class="container-fluid px-3 px-lg-4">
+      <h4 class="section-title"><i class="bi bi-graph-up me-2"></i>BMI Calculator</h4>
+      <div class="row g-4 justify-content-center">
+        <div class="col-lg-5">
+          <div class="card-panel">
+            <h6 class="panel-title mb-4"><i class="bi bi-calculator me-2"></i>Enter Your Details</h6>
+            <div class="mb-3">
+              <label class="form-label fw-500">Weight (kg)</label>
+              <input type="number" class="form-control modern-input" id="bmiWeight" placeholder="e.g. 70" min="20" max="300" step="0.1" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-500">Height (cm)</label>
+              <input type="number" class="form-control modern-input" id="bmiHeight" placeholder="e.g. 170" min="100" max="250" step="0.1" />
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-500">Age (optional)</label>
+              <input type="number" class="form-control modern-input" id="bmiAge" placeholder="e.g. 28" min="10" max="100" />
+            </div>
+            <button class="btn btn-primary-custom w-100 py-3" onclick="calculateBMI()">
+              <i class="bi bi-calculator me-2"></i>Calculate My BMI
+            </button>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div id="bmiResult" class="h-100"></div>
+          <!-- BMI Scale Info -->
+          <div class="bmi-scale-info mt-3">
+            <h6 class="panel-title"><i class="bi bi-info-circle me-2"></i>BMI Scale Reference</h6>
+            <div class="bmi-scale">
+              <div class="bmi-band" style="--c:#3b82f6">
+                <span class="bmi-range">Below 18.5</span>
+                <span class="bmi-cat">Underweight</span>
+              </div>
+              <div class="bmi-band" style="--c:#22c55e">
+                <span class="bmi-range">18.5 – 24.9</span>
+                <span class="bmi-cat">Normal Weight</span>
+              </div>
+              <div class="bmi-band" style="--c:#f59e0b">
+                <span class="bmi-range">25 – 29.9</span>
+                <span class="bmi-cat">Overweight</span>
+              </div>
+              <div class="bmi-band" style="--c:#ef4444">
+                <span class="bmi-range">30 and above</span>
+                <span class="bmi-cat">Obese</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROGRESS TRACKER TAB ── -->
+  <section id="tab-progress" class="tab-section">
+    <div class="container-fluid px-3 px-lg-4">
+      <h4 class="section-title"><i class="bi bi-bar-chart-line me-2"></i>Progress Tracker</h4>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <div class="card-panel">
+            <h6 class="panel-title"><i class="bi bi-plus-circle me-2"></i>Log Today's Activity</h6>
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label small">Weight (kg)</label>
+                <input type="number" class="form-control modern-input" id="logWeight" placeholder="70.5" step="0.1" />
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Calories Burned</label>
+                <input type="number" class="form-control modern-input" id="logCalories" placeholder="350" />
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Workout Duration (min)</label>
+                <input type="number" class="form-control modern-input" id="logDuration" placeholder="30" />
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Mood (1–5)</label>
+                <select class="form-select modern-select" id="logMood">
+                  <option value="5">😄 5 – Excellent</option>
+                  <option value="4">😊 4 – Good</option>
+                  <option value="3" selected>😐 3 – Okay</option>
+                  <option value="2">😔 2 – Low</option>
+                  <option value="1">😫 1 – Poor</option>
+                </select>
+              </div>
+              <div class="col-12 mt-1">
+                <button class="btn btn-primary-custom w-100" onclick="logActivity()">
+                  <i class="bi bi-check2-circle me-2"></i>Save Today's Log
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card-panel">
+            <h6 class="panel-title"><i class="bi bi-trophy me-2"></i>Achievements & Streaks</h6>
+            <div id="achievements"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-panel">
+        <h6 class="panel-title"><i class="bi bi-table me-2"></i>Activity History (Last 7 Days)</h6>
+        <div class="table-responsive">
+          <table class="table modern-table" id="progressTable">
+            <thead>
+              <tr><th>Date</th><th>Weight</th><th>Calories</th><th>Duration</th><th>Mood</th></tr>
+            </thead>
+            <tbody id="progressBody">
+              <tr><td colspan="5" class="text-center text-muted py-4">No entries yet. Log your first activity above!</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── USER PROFILE TAB ── -->
+  <section id="tab-profile" class="tab-section">
+    <div class="container-fluid px-3 px-lg-4">
+      <h4 class="section-title"><i class="bi bi-person-circle me-2"></i>My Profile</h4>
+      <div class="row g-4 justify-content-center">
+        <div class="col-lg-6">
+          <div class="card-panel">
+            <div class="profile-avatar-wrap mb-4">
+              <div class="profile-avatar"><i class="bi bi-person-fill"></i></div>
+              <div>
+                <h5 class="mb-0" id="profileDisplayName">Your Name</h5>
+                <small class="text-muted" id="profileDisplayGoal">Set your goal below</small>
+              </div>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-500">Full Name</label>
+                <input type="text" class="form-control modern-input" id="profileName" placeholder="Enter your name" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-500">Age</label>
+                <input type="number" class="form-control modern-input" id="profileAge" placeholder="e.g. 28" min="10" max="100" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-500">Weight (kg)</label>
+                <input type="number" class="form-control modern-input" id="profileWeight" placeholder="e.g. 70" step="0.1" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-500">Height (cm)</label>
+                <input type="number" class="form-control modern-input" id="profileHeight" placeholder="e.g. 170" step="0.1" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-500">Primary Goal</label>
+                <select class="form-select modern-select" id="profileGoal">
+                  <option value="">Select a goal</option>
+                  <option value="weight loss">⚖️ Weight Loss</option>
+                  <option value="muscle gain">💪 Muscle Gain</option>
+                  <option value="general fitness">🏃 General Fitness</option>
+                  <option value="flexibility">🧘 Flexibility / Yoga</option>
+                  <option value="cardio health">❤️ Cardio Health</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-500">Fitness Level</label>
+                <select class="form-select modern-select" id="profileLevel">
+                  <option value="">Select level</option>
+                  <option value="beginner">🌱 Beginner</option>
+                  <option value="intermediate">🔥 Intermediate</option>
+                  <option value="advanced">🏆 Advanced</option>
+                </select>
+              </div>
+              <div class="col-12 mt-2">
+                <button class="btn btn-primary-custom w-100 py-3" onclick="saveProfile()">
+                  <i class="bi bi-save me-2"></i>Save Profile
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card-panel">
+            <h6 class="panel-title"><i class="bi bi-info-circle me-2"></i>Profile Summary</h6>
+            <div id="profileSummary" class="profile-summary">
+              <p class="text-muted text-center py-4">Fill in your details and save to see your profile summary.</p>
+            </div>
+          </div>
+          <div class="card-panel mt-3">
+            <h6 class="panel-title"><i class="bi bi-gear me-2"></i>Preferences</h6>
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" id="prefVeg" checked />
+              <label class="form-check-label" for="prefVeg">🌱 Vegetarian meal suggestions</label>
+            </div>
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" id="prefIndian" checked />
+              <label class="form-check-label" for="prefIndian">🇮🇳 Prefer Indian food options</label>
+            </div>
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" id="prefHome" checked />
+              <label class="form-check-label" for="prefHome">🏠 Home workout (no equipment)</label>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="prefNotifs" />
+              <label class="form-check-label" for="prefNotifs">🔔 Daily motivation reminders</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════ TOAST NOTIFICATION ═══════════════════ -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="appToast" class="toast" role="alert">
+    <div class="toast-header">
+      <i class="bi bi-check-circle-fill text-success me-2"></i>
+      <strong class="me-auto" id="toastTitle">FitBuddy</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+    </div>
+    <div class="toast-body" id="toastBody"></div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Custom JS -->
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
